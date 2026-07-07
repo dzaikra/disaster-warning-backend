@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RiskLevel {
+  AMAN
+  WASPADA
+  SIAGA
+  BAHAYA
+}
+
+enum NotificationStatus {
+  SENT
+  PENDING
+  FAILED
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+
+  name          String
+  email         String   @unique
+
+  password      String
+
+  latitude      Float?
+  longitude     Float?
+
+  fcmToken      String?
+
+  createdAt     DateTime @default(now())
+
+  riskResults   RiskResult[]
+  notifications Notification[]
+}
+model Earthquake {
+  id              Int      @id @default(autoincrement())
+
+  bmkgId          String   @unique
+
+  magnitude       Float
+  depth           Float
+
+  latitude        Float
+  longitude       Float
+
+  location        String
+
+  potential       String?
+
+  felt            String?
+
+  shakemap        String?
+
+  shakemapUrl     String?
+
+  eventDate       String?
+  eventTime       String?
+
+  earthquakeTime  DateTime
+
+  createdAt       DateTime @default(now())
+
+  riskResults     RiskResult[]
+}
+
+model RiskResult {
+  id               Int        @id @default(autoincrement())
+
+  userId           Int
+  earthquakeId     Int
+
+  distance         Float
+
+  fuzzyDistance    Float
+  fuzzyMagnitude   Float
+  fuzzyDepth       Float
+
+  sawScore         Float
+
+  riskLevel        RiskLevel
+
+  createdAt        DateTime   @default(now())
+
+  user             User       @relation(fields: [userId], references: [id])
+  earthquake       Earthquake @relation(fields: [earthquakeId], references: [id])
+
+  notifications Notification[]
+}
+
+model Notification {
+  id          Int @id @default(autoincrement())
+
+  userId      Int
+  riskResultId Int?
+
+  title       String
+  message     String
+
+  status      NotificationStatus
+
+  sentAt       DateTime?
+
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id])
+
+  riskResult  RiskResult? @relation(fields: [riskResultId], references: [id])
+}
