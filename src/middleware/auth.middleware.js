@@ -8,10 +8,6 @@ const authenticate = (req, res, next) => {
 
     try {
 
-        // ==========================
-        // Ambil Authorization Header
-        // ==========================
-
         const authHeader =
             req.headers.authorization;
 
@@ -26,11 +22,6 @@ const authenticate = (req, res, next) => {
             });
 
         }
-
-        // ==========================
-        // Format:
-        // Bearer xxxxxxxxx
-        // ==========================
 
         const token =
             authHeader.split(" ")[1];
@@ -47,10 +38,6 @@ const authenticate = (req, res, next) => {
 
         }
 
-        // ==========================
-        // Verifikasi JWT
-        // ==========================
-
         const decoded =
             jwt.verify(
 
@@ -59,10 +46,6 @@ const authenticate = (req, res, next) => {
                 process.env.JWT_SECRET
 
             );
-
-        // ==========================
-        // Simpan Data User
-        // ==========================
 
         req.user = decoded;
 

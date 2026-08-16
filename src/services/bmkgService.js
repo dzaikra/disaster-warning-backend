@@ -5,35 +5,60 @@ const {
     parseEarthquakeData,
 } = require("../utils/earthquakeParser");
 
-const BMKG_URL =
-    "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json";
+const {
+    BMKG_AUTOGEMPA_URL,
+} = require("../constants/bmkg.constant");
+
+// ==========================
+// Fetch Earthquake BMKG
+// ==========================
 
 const fetchEarthquake = async () => {
+
     try {
+
         const response =
-            await axios.get(BMKG_URL);
+            await axios.get(
+                BMKG_AUTOGEMPA_URL
+            );
 
         const gempa =
             response?.data?.Infogempa?.gempa;
 
         if (!gempa) {
+
             throw new Error(
-                "Data gempa tidak ditemukan"
+                "Data gempa tidak ditemukan."
             );
+
         }
 
         const earthquakeData =
-            parseEarthquakeData(gempa);
+            parseEarthquakeData(
+                gempa
+            );
 
         const earthquake =
             await prisma.earthquake.upsert({
+
                 where: {
+
                     bmkgId:
                         earthquakeData.bmkgId,
+
                 },
+
                 update: {},
-                create: earthquakeData,
+
+                create:
+                    earthquakeData,
+
             });
+            logger.info(
+
+            `BMKG Updated | Magnitude=${earthquake.magnitude} | Location=${earthquake.location}`
+
+            );
 
         return earthquake;
 
@@ -45,9 +70,13 @@ const fetchEarthquake = async () => {
         );
 
         throw error;
+
     }
+
 };
 
 module.exports = {
+
     fetchEarthquake,
+
 };

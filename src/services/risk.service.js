@@ -19,12 +19,11 @@ const {
 } = require("../utils/classifier");
 
 const {
-    getRiskDescription,
-} = require("../utils/riskDescription");
+    validateRiskLevel,
+} = require("../utils/riskValidation");
 
-const {
-    saveRiskResult,
-} = require("./riskResult.service");
+const logger =
+require("../utils/logger");
 
 // ==========================
 // Analyze Risk
@@ -42,9 +41,11 @@ const analyzeRisk = async (
     // ==========================
 
     if (!userId) {
+
         throw new Error(
             "User authentication failed."
         );
+
     }
 
     // ==========================
@@ -52,18 +53,27 @@ const analyzeRisk = async (
     // ==========================
 
     if (!earthquakeId) {
+
         throw new Error(
             "Earthquake ID is required."
         );
+
     }
 
     if (
+
         userLatitude === undefined ||
+
         userLongitude === undefined
+
     ) {
+
         throw new Error(
+
             "User latitude and longitude are required."
+
         );
+
     }
 
     // ==========================
@@ -82,9 +92,13 @@ const analyzeRisk = async (
         });
 
     if (!earthquake) {
+
         throw new Error(
+
             "Earthquake not found."
+
         );
+
     }
 
     // ==========================
@@ -110,17 +124,23 @@ const analyzeRisk = async (
 
     const fuzzyMagnitudeValue =
         fuzzyMagnitude(
+
             earthquake.magnitude
+
         );
 
     const fuzzyDistanceValue =
         fuzzyDistance(
+
             distance
+
         );
 
     const fuzzyDepthValue =
         fuzzyDepth(
+
             earthquake.depth
+
         );
 
     // ==========================
@@ -142,25 +162,42 @@ const analyzeRisk = async (
         });
 
     // ==========================
-    // Klasifikasi Risiko
+    // Klasifikasi Risiko SAW
     // ==========================
 
-    const riskLevel =
+    const sawRisk =
         classifyRisk(
             sawScore
         );
 
     // ==========================
-    // Simpan Risk Result
+    // Rule-Based Validation
     // ==========================
 
-    const riskResult =
-    await saveRiskResult({
+    const riskLevel =
+        validateRiskLevel(
 
-        userId,
+            distance,
 
-        earthquakeId:
-            earthquake.id,
+            earthquake.magnitude,
+
+            sawRisk
+
+        );
+
+        logger.info(
+
+        `Risk Analysis | User=${userId} | Earthquake=${earthquake.id} | Distance=${distance.toFixed(2)} km | Score=${sawScore.toFixed(4)} | Risk=${riskLevel}`
+
+        );
+
+    // ==========================
+    // Return Analysis
+    // ==========================
+
+    return {
+
+        earthquake,
 
         distance,
 
@@ -181,99 +218,7 @@ const analyzeRisk = async (
 
         riskLevel,
 
-    });
-
-    // ==========================
-    // Response
-    // ==========================
-
-    const result = {
-        
-        riskResultId:
-            riskResult.id,
-
-        earthquakeId:
-            earthquake.id,
-
-        eventDate:
-            earthquake.eventDate,
-
-        eventTime:
-            earthquake.eventTime,
-
-        location:
-            earthquake.location,
-
-        latitude:
-            earthquake.latitude,
-
-        longitude:
-            earthquake.longitude,
-
-        magnitude:
-            earthquake.magnitude,
-
-        depth:
-            earthquake.depth,
-
-        felt:
-            earthquake.felt,
-
-        potential:
-            earthquake.potential,
-
-        shakemap:
-            earthquake.shakemapUrl,
-
-        distance:
-            Number(
-                distance.toFixed(2)
-            ),
-
-        fuzzy: {
-
-            magnitude:
-                Number(
-                    fuzzyMagnitudeValue.toFixed(4)
-                ),
-
-            distance:
-                Number(
-                    fuzzyDistanceValue.toFixed(4)
-                ),
-
-            depth:
-                Number(
-                    fuzzyDepthValue.toFixed(4)
-                ),
-
-        },
-
-        weights: {
-
-            distance: 0.50,
-
-            magnitude: 0.30,
-
-            depth: 0.20,
-
-        },
-
-        sawScore:
-            Number(
-                sawScore.toFixed(4)
-            ),
-
-        riskLevel,
-
-        description:
-            getRiskDescription(
-                riskLevel
-            ),
-
     };
-
-    return result;
 
 };
 

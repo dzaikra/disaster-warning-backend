@@ -13,6 +13,9 @@ const riskRoutes = require(
     "./routes/risk.routes"
 );
 
+const userRoutes =
+require("./routes/user.routes");
+
 const riskResultRoutes =
 require("./routes/riskResult.routes");
 
@@ -33,6 +36,14 @@ app.get(
 
         res.json(users);
     }
+);
+
+app.use(
+
+    "/api/users",
+
+    userRoutes
+
 );
 
 app.use(

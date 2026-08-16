@@ -4,27 +4,43 @@ const prisma = require("../config/prisma");
 // Save Risk Result
 // ==========================
 
-const saveRiskResult = async (data) => {
+const saveRiskResult = (data) => {
 
-    return await prisma.riskResult.create({
+    if (!data.userId) {
+        throw new Error("User ID is required.");
+    }
+
+    if (!data.earthquakeId) {
+        throw new Error("Earthquake ID is required.");
+    }
+
+    return prisma.riskResult.create({
 
         data: {
 
-            userId: data.userId,
+            userId:
+                data.userId,
 
-            earthquakeId: data.earthquakeId,
+            earthquakeId:
+                data.earthquakeId,
 
-            distance: data.distance,
+            distance:
+                data.distance,
 
-            fuzzyDistance: data.fuzzy.distance,
+            fuzzyDistance:
+                data.fuzzy.distance,
 
-            fuzzyMagnitude: data.fuzzy.magnitude,
+            fuzzyMagnitude:
+                data.fuzzy.magnitude,
 
-            fuzzyDepth: data.fuzzy.depth,
+            fuzzyDepth:
+                data.fuzzy.depth,
 
-            sawScore: data.sawScore,
+            sawScore:
+                data.sawScore,
 
-            riskLevel: data.riskLevel,
+            riskLevel:
+                data.riskLevel,
 
         },
 
@@ -36,9 +52,9 @@ const saveRiskResult = async (data) => {
 // Get Risk History
 // ==========================
 
-const getRiskHistory = async (userId) => {
+const getRiskHistory = (userId) => {
 
-    return await prisma.riskResult.findMany({
+    return prisma.riskResult.findMany({
 
         where: {
 
@@ -46,7 +62,17 @@ const getRiskHistory = async (userId) => {
 
         },
 
-        include: {
+        select: {
+
+            id: true,
+
+            distance: true,
+
+            sawScore: true,
+
+            riskLevel: true,
+
+            createdAt: true,
 
             earthquake: {
 
@@ -90,12 +116,12 @@ const getRiskHistory = async (userId) => {
 // Get Risk Detail
 // ==========================
 
-const getRiskDetail = async (
+const getRiskDetail = (
     riskResultId,
     userId
 ) => {
 
-    return await prisma.riskResult.findFirst({
+    return prisma.riskResult.findFirst({
 
         where: {
 

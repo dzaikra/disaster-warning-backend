@@ -1,19 +1,35 @@
-const WEIGHTS = {
-    distance: 0.50,
-    magnitude: 0.30,
-    depth: 0.20,
-};
+const {
+
+    DISTANCE_WEIGHT,
+
+    MAGNITUDE_WEIGHT,
+
+    DEPTH_WEIGHT,
+
+} = require("../constants/weight.constant");
+
+// ==========================
+// Calculate SAW
+// ==========================
 
 const calculateSAW = (fuzzy) => {
-    const score =
-        fuzzy.distance * WEIGHTS.distance +
-        fuzzy.magnitude * WEIGHTS.magnitude +
-        fuzzy.depth * WEIGHTS.depth;
 
-    return Number(score.toFixed(4));
+    const score =
+
+        (fuzzy.distance * DISTANCE_WEIGHT) +
+
+        (fuzzy.magnitude * MAGNITUDE_WEIGHT) +
+
+        (fuzzy.depth * DEPTH_WEIGHT);
+
+    return Number(
+        score.toFixed(4)
+    );
+
 };
 
 module.exports = {
+
     calculateSAW,
-    WEIGHTS,
+
 };
